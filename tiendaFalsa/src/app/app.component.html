@@ -15,11 +15,18 @@
           (click)="onSelectMenu(m.label)"
           [class.active]="selectedMenu === m.label"
         >
-          <!-- El anchor evita navegación real por ahora -->
           <a href="#" (click)="$event.preventDefault()">{{ m.label }}</a>
         </li>
       </ul>
     </nav>
+
+    <div class="carrito-widget" (click)="openModalCarrito()">
+      <span class="carrito-icon">🛒</span>
+      <span class="carrito-badge" *ngIf="getTotalItemsCarrito() > 0">
+        {{ getTotalItemsCarrito() }}
+      </span>
+      <span class="carrito-total">${{ getTotalCarrito() }}</span>
+    </div>
   </div>
 </header>
 
@@ -45,20 +52,73 @@
 <ul *ngIf="!loadingProductos">
   <li *ngFor="let item of productosList">
     
-    <!-- Imagen del producto -->
     <img [src]="item.image" width="80" />
 
-    <!-- Nombre + precio -->
     <strong>{{ item.title }}</strong> — ${{ item.price }}
+
+    <button class="btn-add-carrito" (click)="addToCarrito(item)">
+      Agregar al carrito
+    </button>
 
   </li>
 </ul>
 
-<!-- ************************************************************
-     SECCIÓN: Footer (static)
-     ************************************************************ -->
 <footer class="app-footer">
   <div class="footer-inner">
     <small>{{ footerText }}</small>
   </div>
 </footer>
+
+<div class="modal-overlay" *ngIf="showModalCarrito" (click)="closeModalCarrito()">
+  <div class="modal-carrito" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Mi Carrito</h2>
+      <button class="btn-close" (click)="closeModalCarrito()">✖</button>
+    </div>
+
+    <div class="modal-body">
+      
+      <div *ngIf="cartItems.length === 0" class="carrito-vacio">
+        <p>Tu carrito está vacío</p>
+      </div>
+
+      <div *ngIf="cartItems.length > 0" class="carrito-items">
+        <div class="carrito-item" *ngFor="let item of cartItems">
+          
+          <img [src]="item.product.image" width="60" />
+
+          <div class="item-info">
+            <strong>{{ item.product.title }}</strong>
+            <p>Precio unitario: ${{ item.product.price }}</p>
+          </div>
+
+          <div class="item-controls">
+            <button (click)="updateQuantity(item.product.id, item.quantity - 1)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="updateQuantity(item.product.id, item.quantity + 1)">+</button>
+          </div>
+
+          <div class="item-subtotal">
+            <strong>${{ getSubtotal(item) }}</strong>
+          </div>
+
+          <button class="btn-remove" (click)="removeFromCarrito(item.product.id)">
+            🗑️
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer" *ngIf="cartItems.length > 0">
+      <div class="total-general">
+        <strong>TOTAL A PAGAR:</strong>
+        <span class="total-amount">${{ getTotalCarrito() }}</span>
+      </div>
+      <button class="btn-checkout">Proceder al Pago</button>
+    </div>
+
+  </div>
+</div>
