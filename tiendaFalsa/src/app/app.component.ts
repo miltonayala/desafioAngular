@@ -26,6 +26,14 @@ export class AppComponent implements OnInit {
 
   productosList: Product[] = [];   // ← lista de productos
   loadingProductos: boolean = true; // ← estado de carga
+
+  // ************************************************************
+  // VARIABLE: footerText
+  // ************************************************************
+  // Texto estático que se mostrará en el footer. Lo guardamos
+  // en una variable para que sea fácil de cambiar desde aquí.
+  // ************************************************************
+  footerText: string = 'Copyright (C) 2025 Tienda Falsa DAW';
   // ************************************************************
 // VARIABLE: headerMenuItems + selectedMenu
 // ************************************************************
