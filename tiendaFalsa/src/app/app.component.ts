@@ -12,6 +12,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from './services/product.service';
 import { Product } from './models/product.model';
+import { CartItem } from './models/cart-item.model';
 
 @Component({
   selector: 'app-root',
@@ -24,15 +25,11 @@ export class AppComponent implements OnInit {
   // VARIABLES (spanglish)
   // ************************************************************
 
-  productosList: Product[] = [];   // ← lista de productos
-  loadingProductos: boolean = true; // ← estado de carga
+  productosList: Product[] = [];
+  loadingProductos: boolean = true;
+  cartItems: CartItem[] = [];
+  showModalCarrito: boolean = false;
 
-  // ************************************************************
-  // VARIABLE: footerText
-  // ************************************************************
-  // Texto estático que se mostrará en el footer. Lo guardamos
-  // en una variable para que sea fácil de cambiar desde aquí.
-  // ************************************************************
   footerText: string = 'Copyright (C) 2025 Tienda Falsa DAW';
   // ************************************************************
 // VARIABLE: headerMenuItems + selectedMenu
@@ -67,6 +64,7 @@ selectedMenu: string = 'Inicio';
 
   ngOnInit() {
     this.loadProductosFromAPI();
+    this.loadCarritoFromLocalStorage();
   }
 
   // ************************************************************
@@ -102,5 +100,82 @@ onSelectMenu(label: string) {
         this.loadingProductos = false;
       }
     });
+  }
+
+  loadCarritoFromLocalStorage() {
+    const saved = localStorage.getItem('carritoData');
+    if (saved) {
+      try {
+        this.cartItems = JSON.parse(saved);
+      } catch (error) {
+        console.error('Error parseando carrito desde localStorage:', error);
+        this.cartItems = [];
+      }
+    }
+  }
+
+  saveCarritoToLocalStorage() {
+    localStorage.setItem('carritoData', JSON.stringify(this.cartItems));
+  }
+
+  addToCarrito(product: Product) {
+    const existingItem = this.cartItems.find(
+      item => item.product.id === product.id
+    );
+
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      this.cartItems.push({
+        product: product,
+        quantity: 1
+      });
+    }
+
+    this.saveCarritoToLocalStorage();
+    console.log('Producto agregado al carrito:', product.title);
+  }
+
+  getTotalCarrito(): number {
+    const total = this.cartItems.reduce((sum, item) => {
+      return sum + (item.product.price * item.quantity);
+    }, 0);
+    return Math.round(total * 100) / 100;
+  }
+
+  getTotalItemsCarrito(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  openModalCarrito() {
+    this.showModalCarrito = true;
+  }
+
+  closeModalCarrito() {
+    this.showModalCarrito = false;
+  }
+
+  removeFromCarrito(productId: number) {
+    this.cartItems = this.cartItems.filter(
+      item => item.product.id !== productId
+    );
+    this.saveCarritoToLocalStorage();
+  }
+
+  updateQuantity(productId: number, newQuantity: number) {
+    if (newQuantity <= 0) {
+      this.removeFromCarrito(productId);
+      return;
+    }
+
+    const item = this.cartItems.find(i => i.product.id === productId);
+    if (item) {
+      item.quantity = newQuantity;
+      this.saveCarritoToLocalStorage();
+    }
+  }
+
+  getSubtotal(item: CartItem): number {
+    return Math.round(item.product.price * item.quantity * 100) / 100;
   }
 }
