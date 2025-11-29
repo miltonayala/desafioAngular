@@ -196,6 +196,8 @@ En app.component.html, encima de la lista <ul>, pega esto:
 10. FINAL DEL PROMPT
 ------------------------------------------------------------
 
+Nota: Usamos VSCode entonces siempre recuerda decirle al usuario que haga Save All o guardar todo y dale el shortcut para Windows, Mac y Linux.
+
 Cuando termines de leer todo, responde exactamente:
 
 “Listo, ya tengo todas las reglas cargadas”
