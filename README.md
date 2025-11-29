@@ -36,5 +36,7 @@ src/
 
 # Edicion
 
-Para comenzar a editar la pagina, ir a: `src/app/app.component.html`
+Para comenzar a editar la pagina, ir a: `src/app/app.component.html`. Luego, debes de darle contexto a github copilot usando las instrucciones de /.github/copilot-instructions.md, para que sepa como programar. 
+
+Pidele lo que necesitas agregar y te dara instructions detalladas.
 
