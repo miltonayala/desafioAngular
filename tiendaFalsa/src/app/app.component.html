@@ -1,0 +1,55 @@
+
+<!-- ************************************************************
+     SECCIÓN: Header (nuevo)
+     ************************************************************ -->
+<header class="app-header">
+  <div class="header-inner">
+    <!-- Logo / título a la izquierda -->
+    <div class="logo">#LaTiendaFalsa</div>
+
+    <!-- Menu simple a la derecha -->
+    <nav class="header-nav" role="navigation" aria-label="Main menu">
+      <ul>
+        <li
+          *ngFor="let m of headerMenuItems"
+          (click)="onSelectMenu(m.label)"
+          [class.active]="selectedMenu === m.label"
+        >
+          <!-- El anchor evita navegación real por ahora -->
+          <a href="#" (click)="$event.preventDefault()">{{ m.label }}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ************************************************************
+     SECCIÓN: Título principal
+     ************************************************************ -->
+<h1>#LaTiendaFalsa</h1>
+
+
+<!-- ************************************************************
+     SECCIÓN: Loading message mientras se hace fetch del API
+     ************************************************************ -->
+
+<div *ngIf="loadingProductos">
+  <p>Cargando productos...</p>
+</div>
+
+
+<!-- ************************************************************
+     SECCIÓN: Lista de productos
+     ************************************************************ -->
+
+<ul *ngIf="!loadingProductos">
+  <li *ngFor="let item of productosList">
+    
+    <!-- Imagen del producto -->
+    <img [src]="item.image" width="80" />
+
+    <!-- Nombre + precio -->
+    <strong>{{ item.title }}</strong> — ${{ item.price }}
+
+  </li>
+</ul>
