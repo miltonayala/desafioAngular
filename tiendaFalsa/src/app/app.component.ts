@@ -32,20 +32,32 @@ export class AppComponent implements OnInit {
 
   footerText: string = 'Copyright (C) 2025 Tienda Falsa DAW';
   // ************************************************************
-// VARIABLE: headerMenuItems + selectedMenu
-// ************************************************************
-// Lista simple de items para el header. route es opcional por ahora,
-// la app todavía NO navega; solo guardamos etiquetas para mostrar.
-// ************************************************************
-headerMenuItems: { label: string; route?: string }[] = [
-  { label: 'Inicio', route: '' },
-  { label: 'Productos', route: '/productos' },
-  { label: 'Nosotros', route: '' },
-  { label: 'Contacto', route: '' }
-];
+  // VARIABLE: headerMenuItems + selectedMenu
+  // ************************************************************
+  // Lista simple de items para el header. route es opcional por ahora,
+  // la app todavía NO navega; solo guardamos etiquetas para mostrar.
+  // ************************************************************
+  headerMenuItems: { label: string; route?: string }[] = [
+    { label: 'Inicio', route: '' },
+    { label: 'Productos', route: '/productos' },
+    { label: 'Nosotros', route: '' },
+    { label: 'Contacto', route: '' }
+  ];
 
-// Variable que guarda el menú seleccionado (para destacar el item).
-selectedMenu: string = 'Inicio';
+  // Variable que guarda el menú seleccionado (para destacar el item).
+  selectedMenu: string = 'Inicio';
+
+  // ************************************************************
+  // VARIABLES: estado de pago (spanglish)
+  // ************************************************************
+  // Variables que manejan el estado del proceso de pago.
+  // - pagoEnProgreso: true mientras simulamos la transacción
+  // - pagoSuccess: true cuando la transacción fue exitosa y mostramos el banner
+  // - pagoMessage: mensaje para mostrar al usuario (éxito/error)
+  // ************************************************************
+  pagoEnProgreso: boolean = false;
+  pagoSuccess: boolean = false;
+  pagoMessage: string = '';
 
   // ************************************************************
   // CONSTRUCTOR
@@ -53,7 +65,7 @@ selectedMenu: string = 'Inicio';
   // Inyectamos el ProductService para poder usarlo abajo.
   // ************************************************************
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService) { }
 
   // ************************************************************
   // ngOnInit()
@@ -68,17 +80,17 @@ selectedMenu: string = 'Inicio';
   }
 
   // ************************************************************
-// MÉTODO: onSelectMenu(label)
-// ************************************************************
-// Maneja el click en un item del header. No navega, solo cambia
-// el estado local selectedMenu y hace un console.log para debugging.
-// ************************************************************
-onSelectMenu(label: string) {
-  // Cambiamos el estado visual del menú. Aquí podríamos
-  // añadir navegación más adelante (router.navigate).
-  this.selectedMenu = label;
-  console.log('Menu seleccionado:', label);
-}
+  // MÉTODO: onSelectMenu(label)
+  // ************************************************************
+  // Maneja el click en un item del header. No navega, solo cambia
+  // el estado local selectedMenu y hace un console.log para debugging.
+  // ************************************************************
+  onSelectMenu(label: string) {
+    // Cambiamos el estado visual del menú. Aquí podríamos
+    // añadir navegación más adelante (router.navigate).
+    this.selectedMenu = label;
+    console.log('Menu seleccionado:', label);
+  }
 
   // ************************************************************
   // loadProductosFromAPI()
@@ -178,4 +190,54 @@ onSelectMenu(label: string) {
   getSubtotal(item: CartItem): number {
     return Math.round(item.product.price * item.quantity * 100) / 100;
   }
+
+  // ************************************************************
+  // MÉTODO: procesarPago()
+  // ************************************************************
+  // Simula una transacción de pago:
+  // 1) Si el carrito está vacío muestra un mensaje simple.
+  // 2) Si hay items, activa pagoEnProgreso, espera (simulación) y luego:
+  //    - marca pagoSuccess = true
+  //    - vacía el carrito (this.cartItems = [])
+  //    - guarda el carrito en localStorage
+  //    - cierra el modal después de un pequeño timeout y limpia el mensaje
+  // ************************************************************
+  procesarPago() {
+    // Si no hay productos, avisamos y no procecedemos
+    if (this.cartItems.length === 0) {
+      this.pagoSuccess = false;
+      this.pagoMessage = 'El carrito está vacío. Agrega productos antes de pagar.';
+      return;
+    }
+
+    // Indicamos que el pago está en progreso
+    this.pagoEnProgreso = true;
+    this.pagoMessage = '';
+    this.pagoSuccess = false;
+
+    // Simulación de llamada al gateway de pagos (setTimeout)
+    // ************************************************************
+    // En un caso real aquí llamarías a un servicio que haga la petición
+    // y manejarías errores/timeouts. Para este ejercicio simulamos éxito.
+    // ************************************************************
+    setTimeout(() => {
+      // Fin de la "transacción" simulada
+      this.pagoEnProgreso = false;
+      this.pagoSuccess = true;
+      this.pagoMessage = 'Pago exitoso. ¡Gracias por su compra!';
+
+      // Vaciamos el carrito y actualizamos localStorage
+      this.cartItems = [];
+      this.saveCarritoToLocalStorage();
+
+      // Opcional: cerrar modal automáticamente después de 2 segundos
+      setTimeout(() => {
+        this.closeModalCarrito();
+        // Limpiar mensaje después de cerrar para que al reabrir no aparezca
+        this.pagoSuccess = false;
+        this.pagoMessage = '';
+      }, 2000);
+    }, 1500); // 1.5s de simulación (puedes ajustar)
+  }
+
 }
