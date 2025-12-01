@@ -33,12 +33,20 @@
 <!-- ************************************************************
      SECCIÓN: Título principal + filtro de categoría
      ************************************************************ -->
-<div class="flex items-center justify-between p-4">
-  <h1 class="font-semibold text-sm">Seleccionar categoría:</h1>
+<div class="flex items-center justify-between gap-4 p-4">
+    <input
+    type="text"
+    [(ngModel)]="searchText"
+    placeholder="Escribe nombre, descripción o categoría..." class="border border-solid border-[#ddd] w-[70%] p-4 py-2"
+  />
+  
+  <div class="flex-1 flex item-center justify-end">
+    <h1 class="font-semibold text-sm pt-4">Seleccionar categoría:</h1>
 
   <select [(ngModel)]="selectedCategory" class="py-1 px-4 border-solid border border-[#333] text-sm">
     <option *ngFor="let c of categorias" [ngValue]="c">{{ c }}</option>
   </select>
+  </div>
 </div>
 
 <h2 class="font-semibold text-sm p-4 border-t border-dashed border-[#ddd]">Productos de la categoría: <span class="underline">{{ selectedCategory }}</span></h2>
@@ -52,15 +60,9 @@
   <p>Cargando productos...</p>
 </div>
 
-
-<!-- ************************************************************
-     SECCIÓN: Lista de productos
-     ************************************************************ -->
-
 <ul *ngIf="!loadingProductos">
   <li *ngFor="let item of productosFiltrados">
     <img [src]="item.image" width="80" />
-
     <strong>{{ item.title }}</strong> — ${{ item.price }}
 
     <button class="btn-add-carrito" (click)="addToCarrito(item)">

@@ -48,6 +48,9 @@ headerMenuItems: { label: string; route?: string }[] = [
 selectedMenu: string = 'Inicio';
 categorias: string[] = [];
 selectedCategory = 'Todas'; 
+searchText: string = '';
+
+
   // ************************************************************
   // CONSTRUCTOR
   // ************************************************************
@@ -109,16 +112,28 @@ onSelectMenu(label: string) {
       },
     });
   }
+  
+get productosFiltrados(): Product[] {
+  const q = this.searchText.toLowerCase().trim();
 
+  return this.productosList
+    // 1) filtro por categoría
+    .filter(p =>
+      this.selectedCategory === 'Todas'
+        ? true
+        : p.category === this.selectedCategory
+    )
+    // 2) filtro por texto
+    .filter(p => {
+      if (!q) return true; // si no hay texto, no filtra por texto
+      return (
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+      );
+    });
+}
 
-  get productosFiltrados(): Product[] {
-    if (this.selectedCategory === 'Todas') {
-      return this.productosList;
-    }
-    return this.productosList.filter(
-      (p) => p.category === this.selectedCategory
-    );
-  }
 
   loadCarritoFromLocalStorage() {
     const saved = localStorage.getItem('carritoData');
