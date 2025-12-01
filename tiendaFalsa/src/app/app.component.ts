@@ -46,7 +46,8 @@ headerMenuItems: { label: string; route?: string }[] = [
 
 // Variable que guarda el menú seleccionado (para destacar el item).
 selectedMenu: string = 'Inicio';
-
+categorias: string[] = [];
+selectedCategory = 'Todas'; 
   // ************************************************************
   // CONSTRUCTOR
   // ************************************************************
@@ -89,17 +90,34 @@ onSelectMenu(label: string) {
   // 4. Cambia el estado loading a false
   // ************************************************************
 
-  loadProductosFromAPI() {
+  loadProductosFromAPI(): void {
+    this.loadingProductos = true;
+
     this.productService.getAllProducts().subscribe({
       next: (data) => {
         this.productosList = data;
         this.loadingProductos = false;
+
+        const categoriasUnicas = Array.from(
+          new Set(data.map((p) => p.category))
+        );
+        this.categorias = ['Todas', ...categoriasUnicas];
       },
       error: (err) => {
-        console.error('Error cargando productos:', err);
+        console.error('Error al obtener productos', err);
         this.loadingProductos = false;
-      }
+      },
     });
+  }
+
+
+  get productosFiltrados(): Product[] {
+    if (this.selectedCategory === 'Todas') {
+      return this.productosList;
+    }
+    return this.productosList.filter(
+      (p) => p.category === this.selectedCategory
+    );
   }
 
   loadCarritoFromLocalStorage() {
