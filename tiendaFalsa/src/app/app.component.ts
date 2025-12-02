@@ -29,6 +29,8 @@ export class AppComponent implements OnInit {
   loadingProductos: boolean = true;
   cartItems: CartItem[] = [];
   showModalCarrito: boolean = false;
+  showModalDetalles: boolean = false;
+  selectedProduct: Product | null = null;
 
   footerText: string = 'Copyright (C) 2025 Tienda Falsa DAW';
   // ************************************************************
@@ -177,5 +179,22 @@ onSelectMenu(label: string) {
 
   getSubtotal(item: CartItem): number {
     return Math.round(item.product.price * item.quantity * 100) / 100;
+  }
+
+  openDetallesModal(product: Product) {
+    this.selectedProduct = product;
+    this.showModalDetalles = true;
+  }
+
+  closeDetallesModal() {
+    this.showModalDetalles = false;
+    this.selectedProduct = null;
+  }
+
+  addToCarritoFromModal() {
+    if (this.selectedProduct) {
+      this.addToCarrito(this.selectedProduct);
+      this.closeDetallesModal();
+    }
   }
 }
