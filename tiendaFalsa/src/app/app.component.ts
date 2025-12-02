@@ -48,6 +48,12 @@ headerMenuItems: { label: string; route?: string }[] = [
 
 // Variable que guarda el menú seleccionado (para destacar el item).
 selectedMenu: string = 'Inicio';
+  sliderImages: string[] = [
+    'https://tottoelsalvador.vtexassets.com/assets/vtex.file-manager-graphql/images/fb79ee78-372a-4ceb-a887-6f5aff2e348e___06dc5a3886c25020316f8ca2c265d74a.jpg',
+    'https://tottoelsalvador.vtexassets.com/assets/vtex.file-manager-graphql/images/4a913db0-0c51-4572-ba60-8e26bf144400___e765b4487ac4e43ca54ef3c166755e87.jpg',
+    'https://tottoelsalvador.vtexassets.com/assets/vtex.file-manager-graphql/images/b2504e30-cfbb-46d3-a154-9eacc02f069f___7720b0db050394770054f73c9ad9aaf5.jpg'
+  ];
+  currentSlideIndex: number = 0;
 
   // ************************************************************
   // CONSTRUCTOR
@@ -175,6 +181,18 @@ onSelectMenu(label: string) {
       item.quantity = newQuantity;
       this.saveCarritoToLocalStorage();
     }
+  }
+
+  nextSlide() {
+    this.currentSlideIndex = (this.currentSlideIndex + 1) % this.sliderImages.length;
+  }
+
+  prevSlide() {
+    this.currentSlideIndex = (this.currentSlideIndex - 1 + this.sliderImages.length) % this.sliderImages.length;
+  }
+
+  goToSlide(index: number) {
+    this.currentSlideIndex = index;
   }
 
   getSubtotal(item: CartItem): number {
