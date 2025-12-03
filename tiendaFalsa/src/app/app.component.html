@@ -8,11 +8,6 @@
 
     <!-- Menu simple a la derecha -->
     <nav class="header-nav" role="navigation" aria-label="Main menu">
-      <ul>
-        <li *ngFor="let m of headerMenuItems" (click)="onSelectMenu(m.label)" [class.active]="selectedMenu === m.label">
-          <a href="#" (click)="$event.preventDefault()">{{ m.label }}</a>
-        </li>
-      </ul>
     </nav>
 
     <div class="carrito-widget" (click)="openModalCarrito()">
@@ -47,7 +42,6 @@
   </div>
 </div>
 
-<h1>#LaTiendaFalsa</h1>
 <!-- ************************************************************
      SECCIÓN: Título principal + filtro de categoría
      ************************************************************ -->
@@ -212,6 +206,4 @@
     </div>
 
   </div>
-</div>
-
 </div>
