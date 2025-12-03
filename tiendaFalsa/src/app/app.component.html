@@ -56,7 +56,8 @@
 </div>
 
 <ul *ngIf="!loadingProductos">
-  <li *ngFor="let item of productosList">
+  <!-- <li *ngFor="let item of productosList"> -->
+    <!-- I removed the above line because it was duplicating the product list. -->
 
   <li *ngFor="let item of productosFiltrados">
     <img [src]="item.image" width="80" />
