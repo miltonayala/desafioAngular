@@ -1,20 +1,15 @@
-
 <!-- ************************************************************
      SECCIÓN: Header (nuevo)
      ************************************************************ -->
 <header class="app-header">
   <div class="header-inner">
     <!-- Logo / título a la izquierda -->
-    <div class="logo">#LaTiendaFalsa</div>
+    <div class="logo"><span class="la fugaz-one-regular">#La</span><span class="tienda fugaz-one-regular">Tienda</span><span class="la fugaz-one-regular">Falsa</span></div>
 
     <!-- Menu simple a la derecha -->
     <nav class="header-nav" role="navigation" aria-label="Main menu">
       <ul>
-        <li
-          *ngFor="let m of headerMenuItems"
-          (click)="onSelectMenu(m.label)"
-          [class.active]="selectedMenu === m.label"
-        >
+        <li *ngFor="let m of headerMenuItems" (click)="onSelectMenu(m.label)" [class.active]="selectedMenu === m.label">
           <a href="#" (click)="$event.preventDefault()">{{ m.label }}</a>
         </li>
       </ul>
@@ -53,6 +48,26 @@
 </div>
 
 <h1>#LaTiendaFalsa</h1>
+<!-- ************************************************************
+     SECCIÓN: Título principal + filtro de categoría
+     ************************************************************ -->
+<div class="flex items-center justify-between gap-4 p-4">
+    <input
+    type="text"
+    [(ngModel)]="searchText"
+    placeholder="Escribe nombre, descripción o categoría..." class="border border-solid border-[#ddd] w-[70%] p-4 py-2"
+  />
+  
+  <div class="flex-1 flex item-center justify-end">
+    <h1 class="font-semibold text-sm pt-4">Seleccionar categoría:</h1>
+
+  <select [(ngModel)]="selectedCategory" class="py-1 px-4 border-solid border border-[#333] text-sm">
+    <option *ngFor="let c of categorias" [ngValue]="c">{{ c }}</option>
+  </select>
+  </div>
+</div>
+
+<h2 class="font-semibold text-sm p-4 border-t border-dashed border-[#ddd]">Productos de la categoría: <span class="underline">{{ selectedCategory }}</span></h2>
 
 
 <!-- ************************************************************
@@ -64,26 +79,27 @@
 </div>
 
 <div class="productos-grid" *ngIf="!loadingProductos">
-  <div class="product-card" *ngFor="let producto of productosList">
+  <div class="product-card" *ngFor="let item of productosFiltrados">
     <div class="card-image">
-      <img [src]="producto.image" [alt]="producto.title" />
+      <img [src]="item.image" [alt]="item.title" />
     </div>
     
     <div class="card-content">
-      <h3 class="card-title">{{ producto.title }}</h3>
-      <p class="card-price">${{ producto.price }}</p>
+      <h3 class="card-title">{{ item.title }}</h3>
+      <p class="card-price">${{ item.price }}</p>
       
       <div class="card-actions">
-        <button class="btn-detalles" (click)="openDetallesModal(producto)">
+        <button class="btn-detalles" (click)="openDetallesModal(item)">
           Ver info
         </button>
-        <button class="btn-add-card" (click)="addToCarrito(producto)">
+        <button class="btn-add-card" (click)="addToCarrito(item)">
           🛒
         </button>
       </div>
     </div>
   </div>
 </div>
+
 
 <footer class="app-footer">
   <div class="footer-inner">
@@ -93,21 +109,32 @@
 
 <div class="modal-overlay" *ngIf="showModalCarrito" (click)="closeModalCarrito()">
   <div class="modal-carrito" (click)="$event.stopPropagation()">
-    
+
     <div class="modal-header">
       <h2>Mi Carrito</h2>
       <button class="btn-close" (click)="closeModalCarrito()">✖</button>
     </div>
 
     <div class="modal-body">
-      
+      <!-- ************************************************************
+     SECCIÓN: Mensaje de estado de pago (loading / success)
+     ************************************************************ -->
+      <div *ngIf="pagoEnProgreso" class="pago-loading" aria-live="polite">
+        <p>Procesando el pago... por favor espera.</p>
+      </div>
+
+      <div *ngIf="pagoSuccess" class="pago-success" aria-live="polite">
+        <p>{{ pagoMessage }}</p>
+      </div>
+      <!-- FIN: Mensaje de estado de pago -->
+
       <div *ngIf="cartItems.length === 0" class="carrito-vacio">
         <p>Tu carrito está vacío</p>
       </div>
 
       <div *ngIf="cartItems.length > 0" class="carrito-items">
         <div class="carrito-item" *ngFor="let item of cartItems">
-          
+
           <img [src]="item.product.image" width="60" />
 
           <div class="item-info">
@@ -139,7 +166,9 @@
         <strong>TOTAL A PAGAR:</strong>
         <span class="total-amount">${{ getTotalCarrito() }}</span>
       </div>
-      <button class="btn-checkout">Proceder al Pago</button>
+      <button class="btn-checkout" (click)="procesarPago()" [disabled]="pagoEnProgreso">
+        {{ pagoEnProgreso ? 'Procesando...' : 'Proceder al Pago' }}
+      </button>
     </div>
 
   </div>
@@ -185,3 +214,4 @@
   </div>
 </div>
 
+</div>
