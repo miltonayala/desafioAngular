@@ -46,6 +46,10 @@ headerMenuItems: { label: string; route?: string }[] = [
 
 // Variable que guarda el menú seleccionado (para destacar el item).
 selectedMenu: string = 'Inicio';
+categorias: string[] = [];
+selectedCategory = 'Todas'; 
+searchText: string = '';
+
 
   // ************************************************************
   // CONSTRUCTOR
@@ -89,18 +93,47 @@ onSelectMenu(label: string) {
   // 4. Cambia el estado loading a false
   // ************************************************************
 
-  loadProductosFromAPI() {
+  loadProductosFromAPI(): void {
+    this.loadingProductos = true;
+
     this.productService.getAllProducts().subscribe({
       next: (data) => {
         this.productosList = data;
         this.loadingProductos = false;
+
+        const categoriasUnicas = Array.from(
+          new Set(data.map((p) => p.category))
+        );
+        this.categorias = ['Todas', ...categoriasUnicas];
       },
       error: (err) => {
-        console.error('Error cargando productos:', err);
+        console.error('Error al obtener productos', err);
         this.loadingProductos = false;
-      }
+      },
     });
   }
+  
+get productosFiltrados(): Product[] {
+  const q = this.searchText.toLowerCase().trim();
+
+  return this.productosList
+    // 1) filtro por categoría
+    .filter(p =>
+      this.selectedCategory === 'Todas'
+        ? true
+        : p.category === this.selectedCategory
+    )
+    // 2) filtro por texto
+    .filter(p => {
+      if (!q) return true; // si no hay texto, no filtra por texto
+      return (
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+      );
+    });
+}
+
 
   loadCarritoFromLocalStorage() {
     const saved = localStorage.getItem('carritoData');
