@@ -1,4 +1,3 @@
-
 <!-- ************************************************************
      SECCIÓN: Header (nuevo)
      ************************************************************ -->
@@ -10,11 +9,7 @@
     <!-- Menu simple a la derecha -->
     <nav class="header-nav" role="navigation" aria-label="Main menu">
       <ul>
-        <li
-          *ngFor="let m of headerMenuItems"
-          (click)="onSelectMenu(m.label)"
-          [class.active]="selectedMenu === m.label"
-        >
+        <li *ngFor="let m of headerMenuItems" (click)="onSelectMenu(m.label)" [class.active]="selectedMenu === m.label">
           <a href="#" (click)="$event.preventDefault()">{{ m.label }}</a>
         </li>
       </ul>
@@ -61,6 +56,8 @@
 </div>
 
 <ul *ngIf="!loadingProductos">
+  <li *ngFor="let item of productosList">
+
   <li *ngFor="let item of productosFiltrados">
     <img [src]="item.image" width="80" />
     <strong>{{ item.title }}</strong> — ${{ item.price }}
@@ -80,21 +77,32 @@
 
 <div class="modal-overlay" *ngIf="showModalCarrito" (click)="closeModalCarrito()">
   <div class="modal-carrito" (click)="$event.stopPropagation()">
-    
+
     <div class="modal-header">
       <h2>Mi Carrito</h2>
       <button class="btn-close" (click)="closeModalCarrito()">✖</button>
     </div>
 
     <div class="modal-body">
-      
+      <!-- ************************************************************
+     SECCIÓN: Mensaje de estado de pago (loading / success)
+     ************************************************************ -->
+      <div *ngIf="pagoEnProgreso" class="pago-loading" aria-live="polite">
+        <p>Procesando el pago... por favor espera.</p>
+      </div>
+
+      <div *ngIf="pagoSuccess" class="pago-success" aria-live="polite">
+        <p>{{ pagoMessage }}</p>
+      </div>
+      <!-- FIN: Mensaje de estado de pago -->
+
       <div *ngIf="cartItems.length === 0" class="carrito-vacio">
         <p>Tu carrito está vacío</p>
       </div>
 
       <div *ngIf="cartItems.length > 0" class="carrito-items">
         <div class="carrito-item" *ngFor="let item of cartItems">
-          
+
           <img [src]="item.product.image" width="60" />
 
           <div class="item-info">
@@ -126,7 +134,9 @@
         <strong>TOTAL A PAGAR:</strong>
         <span class="total-amount">${{ getTotalCarrito() }}</span>
       </div>
-      <button class="btn-checkout">Proceder al Pago</button>
+      <button class="btn-checkout" (click)="procesarPago()" [disabled]="pagoEnProgreso">
+        {{ pagoEnProgreso ? 'Procesando...' : 'Proceder al Pago' }}
+      </button>
     </div>
 
   </div>
