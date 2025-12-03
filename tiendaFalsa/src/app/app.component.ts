@@ -39,12 +39,7 @@ export class AppComponent implements OnInit {
   // Lista simple de items para el header. route es opcional por ahora,
   // la app todavía NO navega; solo guardamos etiquetas para mostrar.
   // ************************************************************
-  headerMenuItems: { label: string; route?: string }[] = [
-    { label: 'Inicio', route: '' },
-    { label: 'Productos', route: '/productos' },
-    { label: 'Nosotros', route: '' },
-    { label: 'Contacto', route: '' }
-  ];
+
 
   // ************************************************************
   // VARIABLES: estado de pago (spanglish)
@@ -271,6 +266,7 @@ get productosFiltrados(): Product[] {
   //    - guarda el carrito en localStorage
   //    - cierra el modal después de un pequeño timeout y limpia el mensaje
   // ************************************************************
+  
   procesarPago() {
     // Si no hay productos, avisamos y no procecedemos
     if (this.cartItems.length === 0) {
