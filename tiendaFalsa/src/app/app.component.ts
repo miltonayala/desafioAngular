@@ -12,6 +12,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from './services/product.service';
 import { Product } from './models/product.model';
+import { CartItem } from './models/cart-item.model';
 
 @Component({
   selector: 'app-root',
@@ -24,15 +25,13 @@ export class AppComponent implements OnInit {
   // VARIABLES (spanglish)
   // ************************************************************
 
-  productosList: Product[] = [];   // ← lista de productos
-  loadingProductos: boolean = true; // ← estado de carga
+  productosList: Product[] = [];
+  loadingProductos: boolean = true;
+  cartItems: CartItem[] = [];
+  showModalCarrito: boolean = false;
+  showModalDetalles: boolean = false;
+  selectedProduct: Product | null = null;
 
-  // ************************************************************
-  // VARIABLE: footerText
-  // ************************************************************
-  // Texto estático que se mostrará en el footer. Lo guardamos
-  // en una variable para que sea fácil de cambiar desde aquí.
-  // ************************************************************
   footerText: string = 'Copyright (C) 2025 Tienda Falsa DAW';
   // ************************************************************
 // VARIABLE: headerMenuItems + selectedMenu
@@ -49,6 +48,12 @@ headerMenuItems: { label: string; route?: string }[] = [
 
 // Variable que guarda el menú seleccionado (para destacar el item).
 selectedMenu: string = 'Inicio';
+  sliderImages: string[] = [
+    'https://tottoelsalvador.vtexassets.com/assets/vtex.file-manager-graphql/images/fb79ee78-372a-4ceb-a887-6f5aff2e348e___06dc5a3886c25020316f8ca2c265d74a.jpg',
+    'https://tottoelsalvador.vtexassets.com/assets/vtex.file-manager-graphql/images/4a913db0-0c51-4572-ba60-8e26bf144400___e765b4487ac4e43ca54ef3c166755e87.jpg',
+    'https://tottoelsalvador.vtexassets.com/assets/vtex.file-manager-graphql/images/b2504e30-cfbb-46d3-a154-9eacc02f069f___7720b0db050394770054f73c9ad9aaf5.jpg'
+  ];
+  currentSlideIndex: number = 0;
 
   // ************************************************************
   // CONSTRUCTOR
@@ -67,6 +72,7 @@ selectedMenu: string = 'Inicio';
 
   ngOnInit() {
     this.loadProductosFromAPI();
+    this.loadCarritoFromLocalStorage();
   }
 
   // ************************************************************
@@ -102,5 +108,111 @@ onSelectMenu(label: string) {
         this.loadingProductos = false;
       }
     });
+  }
+
+  loadCarritoFromLocalStorage() {
+    const saved = localStorage.getItem('carritoData');
+    if (saved) {
+      try {
+        this.cartItems = JSON.parse(saved);
+      } catch (error) {
+        console.error('Error parseando carrito desde localStorage:', error);
+        this.cartItems = [];
+      }
+    }
+  }
+
+  saveCarritoToLocalStorage() {
+    localStorage.setItem('carritoData', JSON.stringify(this.cartItems));
+  }
+
+  addToCarrito(product: Product) {
+    const existingItem = this.cartItems.find(
+      item => item.product.id === product.id
+    );
+
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      this.cartItems.push({
+        product: product,
+        quantity: 1
+      });
+    }
+
+    this.saveCarritoToLocalStorage();
+    console.log('Producto agregado al carrito:', product.title);
+  }
+
+  getTotalCarrito(): number {
+    const total = this.cartItems.reduce((sum, item) => {
+      return sum + (item.product.price * item.quantity);
+    }, 0);
+    return Math.round(total * 100) / 100;
+  }
+
+  getTotalItemsCarrito(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  openModalCarrito() {
+    this.showModalCarrito = true;
+  }
+
+  closeModalCarrito() {
+    this.showModalCarrito = false;
+  }
+
+  removeFromCarrito(productId: number) {
+    this.cartItems = this.cartItems.filter(
+      item => item.product.id !== productId
+    );
+    this.saveCarritoToLocalStorage();
+  }
+
+  updateQuantity(productId: number, newQuantity: number) {
+    if (newQuantity <= 0) {
+      this.removeFromCarrito(productId);
+      return;
+    }
+
+    const item = this.cartItems.find(i => i.product.id === productId);
+    if (item) {
+      item.quantity = newQuantity;
+      this.saveCarritoToLocalStorage();
+    }
+  }
+
+  nextSlide() {
+    this.currentSlideIndex = (this.currentSlideIndex + 1) % this.sliderImages.length;
+  }
+
+  prevSlide() {
+    this.currentSlideIndex = (this.currentSlideIndex - 1 + this.sliderImages.length) % this.sliderImages.length;
+  }
+
+  goToSlide(index: number) {
+    this.currentSlideIndex = index;
+  }
+
+  getSubtotal(item: CartItem): number {
+    return Math.round(item.product.price * item.quantity * 100) / 100;
+  }
+
+  openDetallesModal(product: Product) {
+    this.selectedProduct = product;
+    this.showModalDetalles = true;
+  }
+
+  closeDetallesModal() {
+    this.showModalDetalles = false;
+    this.selectedProduct = null;
+  }
+
+  addToCarritoFromModal() {
+    if (this.selectedProduct) {
+      this.addToCarrito(this.selectedProduct);
+      this.closeDetallesModal();
+    }
   }
 }

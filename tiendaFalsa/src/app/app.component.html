@@ -15,17 +15,43 @@
           (click)="onSelectMenu(m.label)"
           [class.active]="selectedMenu === m.label"
         >
-          <!-- El anchor evita navegación real por ahora -->
           <a href="#" (click)="$event.preventDefault()">{{ m.label }}</a>
         </li>
       </ul>
     </nav>
+
+    <div class="carrito-widget" (click)="openModalCarrito()">
+      <span class="carrito-icon">🛒</span>
+      <span class="carrito-badge" *ngIf="getTotalItemsCarrito() > 0">
+        {{ getTotalItemsCarrito() }}
+      </span>
+      <span class="carrito-total">${{ getTotalCarrito() }}</span>
+    </div>
   </div>
 </header>
 
-<!-- ************************************************************
-     SECCIÓN: Título principal
-     ************************************************************ -->
+<div class="slider-container">
+  <div class="slider-wrapper">
+    <div class="slider-track" [style.transform]="'translateX(-' + (currentSlideIndex * 100) + '%)'">
+      <div class="slide" *ngFor="let image of sliderImages">
+        <img [src]="image" alt="Producto destacado">
+      </div>
+    </div>
+  </div>
+
+  <button class="slider-btn slider-btn-prev" (click)="prevSlide()">‹</button>
+  <button class="slider-btn slider-btn-next" (click)="nextSlide()">›</button>
+
+  <div class="slider-dots">
+    <span 
+      *ngFor="let image of sliderImages; let i = index" 
+      class="dot" 
+      [class.active]="currentSlideIndex === i"
+      (click)="goToSlide(i)">
+    </span>
+  </div>
+</div>
+
 <h1>#LaTiendaFalsa</h1>
 
 
@@ -37,28 +63,125 @@
   <p>Cargando productos...</p>
 </div>
 
-
-<!-- ************************************************************
-     SECCIÓN: Lista de productos
-     ************************************************************ -->
-
-<ul *ngIf="!loadingProductos">
-  <li *ngFor="let item of productosList">
+<div class="productos-grid" *ngIf="!loadingProductos">
+  <div class="product-card" *ngFor="let producto of productosList">
+    <div class="card-image">
+      <img [src]="producto.image" [alt]="producto.title" />
+    </div>
     
-    <!-- Imagen del producto -->
-    <img [src]="item.image" width="80" />
+    <div class="card-content">
+      <h3 class="card-title">{{ producto.title }}</h3>
+      <p class="card-price">${{ producto.price }}</p>
+      
+      <div class="card-actions">
+        <button class="btn-detalles" (click)="openDetallesModal(producto)">
+          Ver info
+        </button>
+        <button class="btn-add-card" (click)="addToCarrito(producto)">
+          🛒
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <!-- Nombre + precio -->
-    <strong>{{ item.title }}</strong> — ${{ item.price }}
-
-  </li>
-</ul>
-
-<!-- ************************************************************
-     SECCIÓN: Footer (static)
-     ************************************************************ -->
 <footer class="app-footer">
   <div class="footer-inner">
     <small>{{ footerText }}</small>
   </div>
 </footer>
+
+<div class="modal-overlay" *ngIf="showModalCarrito" (click)="closeModalCarrito()">
+  <div class="modal-carrito" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Mi Carrito</h2>
+      <button class="btn-close" (click)="closeModalCarrito()">✖</button>
+    </div>
+
+    <div class="modal-body">
+      
+      <div *ngIf="cartItems.length === 0" class="carrito-vacio">
+        <p>Tu carrito está vacío</p>
+      </div>
+
+      <div *ngIf="cartItems.length > 0" class="carrito-items">
+        <div class="carrito-item" *ngFor="let item of cartItems">
+          
+          <img [src]="item.product.image" width="60" />
+
+          <div class="item-info">
+            <strong>{{ item.product.title }}</strong>
+            <p>Precio unitario: ${{ item.product.price }}</p>
+          </div>
+
+          <div class="item-controls">
+            <button (click)="updateQuantity(item.product.id, item.quantity - 1)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="updateQuantity(item.product.id, item.quantity + 1)">+</button>
+          </div>
+
+          <div class="item-subtotal">
+            <strong>${{ getSubtotal(item) }}</strong>
+          </div>
+
+          <button class="btn-remove" (click)="removeFromCarrito(item.product.id)">
+            🗑️
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer" *ngIf="cartItems.length > 0">
+      <div class="total-general">
+        <strong>TOTAL A PAGAR:</strong>
+        <span class="total-amount">${{ getTotalCarrito() }}</span>
+      </div>
+      <button class="btn-checkout">Proceder al Pago</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModalDetalles" (click)="closeDetallesModal()">
+  <div class="modal-detalles" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Detalles del Producto</h2>
+      <button class="btn-close" (click)="closeDetallesModal()">✖</button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedProduct">
+      <div class="detalles-layout">
+        <div class="detalles-image">
+          <img [src]="selectedProduct.image" [alt]="selectedProduct.title" />
+        </div>
+        
+        <div class="detalles-info">
+          <h3>{{ selectedProduct.title }}</h3>
+          <p class="detalles-category">
+            <strong>Categoría:</strong> {{ selectedProduct.category }}
+          </p>
+          <p class="detalles-description">{{ selectedProduct.description }}</p>
+          <p class="detalles-id">
+            <strong>ID:</strong> {{ selectedProduct.id }}
+          </p>
+          <p class="detalles-price">${{ selectedProduct.price }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="closeDetallesModal()">
+        Cancelar
+      </button>
+      <button class="btn-agregar-modal" (click)="addToCarritoFromModal()">
+        Agregar al Carrito
+      </button>
+    </div>
+
+  </div>
+</div>
+
